@@ -1,0 +1,75 @@
+1. 小程序中 flex布局 和 rpx 是小程序布局上最好的方式 （建议使用iphone6尺寸，如：24px = 12rpx）
+2. 小程序中css 选择器远比文档要支持的多
+如： 子代选择器 container > xx {}      container > xx :first-child view {}
+3. 小程序组件继承，官方文档解释只有 font  color 能从 page跟元素往下继承，其他元素样式无法继承
+4. 小程序中监听tap事件 <view bind:tap="xxxx">xxxx</view> 建议使用bind：tap 加入冒号，直接写bindtap 也可以
+5. 小程序中自定义组件中的js的属性说明
+properties: { // 组件的属性列表
+    myProperty: { // 属性名
+      type: String, // 类型（必填），目前接受的类型包括：String, Number, Boolean, Object, Array, null（表示任意类型）
+      value: '', // 属性初始值（可选），如果未指定则会根据类型选择一个
+      observer: function(newVal, oldVal, changedPath) {
+         // 属性被改变时执行的函数（可选），也可以写成在methods段中定义的方法名字符串, 如：'_propertyChange'
+         // 通常 newVal 就是新设置的数据， oldVal 是旧数据
+      }
+    },
+    myProperty2: String // 简化的定义方式
+  },
+6. 函数和方法区分？
+  例子: function xxx() {}    // 叫方法 和 函数 都可以
+  如果在es6的 class 类里面定义的 xxx (){}   通常叫做 方法，不会叫函数
+7. es6 Module export import 引入文件方式
+例子：如项目中目录下有个config文件
+export const config = {
+  api_base_url: 'http://bl.7yue.pro/v1/',
+  appkey: 'AbhC31IG7ruCDp57'
+}
+在utils中的http.js要使用config.js文件，那么引入方式是 import {config} from '/config.js'   // 花括号里的名字要与
+config中定义的变量名一致， 如果不想使用花括号里的名字，那么要这样：import {config as config1} from '/config.js'
+加入as 那么以后在下面代码中就要用  config1 进行代码逻辑
+ // 可以在每个变量前面加入export导出
+// 也可以单独定义个export 导出多个变量
+// 着这里也可以改变变量名字用 as 
+// 如果这里用了 as 改变名字了，那么在其他引用本模块 就要用 as后面的新名字
+【用import时候要使用相对路径，绝对路径会报错】
+
+8. 自定义组件properties 中的observer
+不要在observer函数里改变他本身的值
+比如： 
+properties: {
+    index: {
+      type: Number,
+      observer: function(newVal, oldVal, changedPath) {
+        let val = newVal < 10? '0'+newVal: newVal
+        this.setData({ // 不要在observer函数中修改它本身的值 （不要在这里改变properties下的index值）
+          _index: val // 可以在data里定义个需要此值的属性， 比如在data里定义个_index，那么wxml里可以使用_index
+        })
+      }
+    }
+  },
+data: {
+  _index: 0
+}
+
+9. behavior和自定义组件中的js 一样 ，要以Behavior({}) 
+behavior属于各个组件都共享的资源
+behavior中可以定义 像 自定义组件中那些属性 和 生命周期
+详情见： classic-beh.js
+举例： 
+components组件的js中定义：
+properties: {
+  img: 1
+},
+behavior.js 中定义： 
+properties: {
+  img: 2
+},
+如果components自定义的组件js中定义的与 behavior中定义的相同，那么自身的js中定义的会覆盖behavior的
+（也就是优先权高于behavior）
+
+10. behaviors: [classicBeh], // 为什么behaviors 加s，可以定义多个，behaviors: [classicBeh，a, b, c,..],
+如果定义多个，那么数组中的最后一个 优先级是最高的
+
+11. es6字符拼接
+例子：let a = '123'
+      console.log(`${a}456`)  // 123456
